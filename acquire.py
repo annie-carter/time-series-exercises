@@ -4,12 +4,18 @@ import pandas as pd
 import numpy as np
 import matplotlib as plt
 import seaborn as sns
-
+from env import user, password, hostname, get_connection
 import os
 import datetime
 import requests
 
+def get_connection(db, user=user, host=hostname, password=password):
+    '''
+    Establishes connection to SQL server
+    '''
+    return f'mysql+pymysql://{user}:{password}@{host}/{db}'
 
+#-------- SWAPI ---------
 #STARWARS PEOPLE 
 '''This function gets starwars people '''
 #Worked to integrated the code steps for one clean code will use this version for acquire.py 
@@ -72,7 +78,7 @@ def get_starships_data():
             json_data = response.json()
             results = json_data['results']
             data.extend(results)
-            url = json_data['next']  # Update the URL with the next page URL
+            url = json_data['next']  
 
             if url is None:
                 break
@@ -92,8 +98,34 @@ def get_starwars_data(starwars_df):
     df_starwars = starwars_df
 
     # Save the DataFrame to a CSV file
-    df_starwars.to_csv("starwars.csv", index=False)  # Specify 'index=False' to exclude the index column in the CSV
+    # Specify 'index=False' to exclude the index column in the CSV
+    df_starwars.to_csv("starwars.csv", index=False)  
 
     filename = 'starwars.csv'
     if os.path.isfile(filename):
         return pd.read_csv(filename)
+    
+    
+#-------- TSA -----
+def get_store_data():
+    '''This function gets store data'''
+
+    filename = 'tsa_store.csv'
+
+    if os.path.isfile(filename):
+        return pd.read_csv(filename, index_col=0)
+    else:
+        #  SQL code to retrieve data 
+        sql = '''
+        SELECT *
+        FROM sales
+        JOIN items USING (item_id)
+        JOIN stores USING (store_id)
+        LIMIT 10000;
+        '''
+        df = pd.read_sql(sql, get_connection('tsa_item_demand'))
+
+        # create CSV file
+        df.to_csv(filename, index=False)
+
+        return df
