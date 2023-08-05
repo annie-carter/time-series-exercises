@@ -104,7 +104,27 @@ def get_starwars_data(starwars_df):
     filename = 'starwars.csv'
     if os.path.isfile(filename):
         return pd.read_csv(filename)
-    
+
+def get_power_data():
+    '''
+    This function acquires the Open Power Systems Data for Germany csv
+    '''
+    filename = 'opsd_germany_daily.csv'
+
+    # Verify if file exists
+    if os.path.isfile(filename):
+        return pd.read_csv(filename)
+    # Download data if file doesn't exist
+    else:
+        url = "https://raw.githubusercontent.com/jenfly/opsd/master/opsd_germany_daily.csv"
+        try:
+            df = pd.read_csv(url)
+            df.to_csv(filename, index=False)
+            print("Data acquired and saved successfully.")
+            return df
+        except Exception as e:
+            print("Error while downloading the data:", e)
+            return None
     
 #-------- TSA -----
 def get_store_data():
